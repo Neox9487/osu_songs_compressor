@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+
+# virtual environment
+venv/
+
+# PyInstaller / build artifacts
+osu_compressor.spec
+build/
+dist/
+
+# project
+assets/
+
+# inno
+osu_compressor_iss.iss
+
+# installer
+installer/

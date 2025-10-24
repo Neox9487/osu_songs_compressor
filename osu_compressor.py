@@ -1,7 +1,7 @@
 import os
 import sys
 import zipfile
-import shutil
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QListWidget, QMessageBox, QLabel, QListWidgetItem,
@@ -269,36 +269,37 @@ class OsuCompressor(QWidget):
             QMessageBox.warning(self, "錯誤", "右側清單沒有歌曲可壓縮！")
             return
 
-        self.setEnabled(False)  
+        self.setEnabled(False)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(0)
 
-        success = 0
-        for idx in range(total):
-            folder_name = self.selected_list.item(idx).text()
+        folder_names = [self.selected_list.item(i).text() for i in range(total)]
+
+        def compress_song(folder_name):
             folder_path = os.path.join(self.songs_path, folder_name)
             osz_path = os.path.join(self.output_path, folder_name + ".osz")
-
             with zipfile.ZipFile(osz_path, "w", zipfile.ZIP_DEFLATED) as zf:
                 for root, _, files in os.walk(folder_path):
                     for f in files:
                         abs_path = os.path.join(root, f)
                         rel_path = os.path.relpath(abs_path, folder_path)
                         zf.write(abs_path, rel_path)
+            return folder_name
 
-            success += 1
-            self.progress_bar.setValue(idx + 1)
-            QApplication.processEvents()  
+        success = 0
+        max_workers = min(4, total)
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [executor.submit(compress_song, name) for name in folder_names]
+            for _ in as_completed(futures):
+                success += 1
+                self.progress_bar.setValue(success)
+                QApplication.processEvents()
 
         self.setEnabled(True)
         QApplication.restoreOverrideCursor()
 
-        
-        if total == success:
-            QMessageBox.information(self, "完成", f"壓縮 {success} 首歌曲至\n{self.output_path}")
-        else:
-            QMessageBox.information(self, "完成", f"壓縮 {success} 首歌曲至\n{self.output_path}\n 有 {total-success} 首失敗")
+        QMessageBox.information(self, "完成", f"壓縮 {success} 首歌曲至\n{self.output_path}")
         self.selected_list.clear()
         self.progress_bar.setValue(0)
         self.update_labels()

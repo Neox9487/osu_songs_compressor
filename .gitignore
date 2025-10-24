@@ -5,7 +5,7 @@ __pycache__/
 venv/
 
 # PyInstaller / build artifacts
-main.spec
+osu_compressor.spec
 build/
 dist/
 

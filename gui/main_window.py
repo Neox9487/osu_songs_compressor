@@ -1,23 +1,13 @@
 import os
-import sys
-import zipfile
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QFileDialog, QListWidget, QMessageBox, QLabel, QListWidgetItem,
-    QProgressBar
+    QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
+    QFileDialog, QListWidget, QMessageBox, QLabel, QListWidgetItem, QProgressBar, QApplication
 )
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize
 
-from typing import List
-
-# 對齊方式
-# Qt.AlignLeft	 靠左對齊
-# Qt.AlignRight	 靠右對齊
-# Qt.AlignCenter 置中對齊
-# Qt.AlignTop	 上對齊
-# Qt.AlignBottom 下對齊
+from actions import compress_songs
+from utils.file import find_background_image
 
 class OsuCompressor(QWidget):
     def __init__(self):
@@ -55,7 +45,6 @@ class OsuCompressor(QWidget):
         main_layout.addWidget(self.progress_bar)
 
         # 下面
-        # 有歌曲跟新增刪除的地方
         lists_layout = QHBoxLayout()
         # 左邊
         left_layout = QVBoxLayout()
@@ -91,7 +80,7 @@ class OsuCompressor(QWidget):
 
         self.setLayout(main_layout)
 
-        # 綁定事件(按鈕的
+        # 綁定事件
         self.select_btn.clicked.connect(self.select_songs_folder)
         self.output_btn.clicked.connect(self.select_output_folder)
         self.refresh_btn.clicked.connect(self.load_song_folders)
@@ -100,12 +89,12 @@ class OsuCompressor(QWidget):
         self.compress_btn.clicked.connect(self.compress_selected)
         self.available_list.itemSelectionChanged.connect(self.update_labels)
         self.selected_list.itemSelectionChanged.connect(self.update_labels)
-        
+
         self.songs_path = None
         self.output_path = None
 
-        # OSU 圖片路徑(給沒有 bg 的歌曲用
-        self.default_icon_path = os.path.join(os.path.dirname(__file__), "assets", "osu.png")
+        # OSU 圖片路徑(給沒有 bg 的歌曲用)
+        self.default_icon_path = os.path.join(os.path.dirname(__file__), "../assets/osu.png")
 
     def select_songs_folder(self):
         "選 Songs 資料夾"
@@ -129,36 +118,6 @@ class OsuCompressor(QWidget):
     def update_compress_button_state(self):
         "更新壓縮按鈕(能不能開壓"
         self.compress_btn.setEnabled(bool(self.songs_path and self.output_path))
-
-    def find_background_image(self, folder_path):
-        "找歌曲的bg"
-        osu_files: List[str] = [f for f in os.listdir(folder_path) if f.lower().endswith(".osu")]
-        for osu_file in osu_files:
-            osu_path = os.path.join(folder_path, osu_file)
-            try:
-                with open(osu_path, "r", encoding="utf-8", errors="ignore") as f:
-                    lines = f.readlines()
-
-                in_events = False
-                for line in lines:
-                    line = line.strip()
-                    if line.startswith("[Events]"):
-                        in_events = True
-                        continue
-                    if in_events:
-                        # 通常背景行長這樣：0,0,"bg.jpg",0,0
-                        if line.startswith("0,0,") and '"' in line:
-                            parts = line.split('"')
-                            if len(parts) >= 2:
-                                bg_filename = parts[1]
-                                bg_path = os.path.join(folder_path, bg_filename)
-                                if os.path.exists(bg_path):
-                                    return bg_path
-                                else:
-                                    return None
-            except Exception:
-                continue
-        return None
 
     def load_song_folders(self):
         "拿歌們"
@@ -188,7 +147,7 @@ class OsuCompressor(QWidget):
                 continue
     
             # 處裡背景圖示
-            bg = self.find_background_image(folder_path)
+            bg = find_background_image(folder_path)
             pixmap = QPixmap(bg) if bg else QPixmap(self.default_icon_path)
             pixmap = pixmap.scaled(96, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
             icon = QIcon(pixmap)
@@ -225,39 +184,6 @@ class OsuCompressor(QWidget):
             self.selected_list.takeItem(self.selected_list.row(item))
         self.update_labels()
 
-    # def delete_selected(self):
-    #     "刪歌 用不到"
-    #     if not self.songs_path:
-    #         QMessageBox.warning(self, "錯誤", "請先選擇 Songs 資料夾！")
-    #         return
-
-    #     selected = self.selected_list.selectedItems()
-    #     if not selected:
-    #         QMessageBox.warning(self, "錯誤", "請先選擇要刪除的歌曲！")
-    #         return
-
-    #     reply = QMessageBox.question(
-    #         self,
-    #         "確認刪除",
-    #         f"確定要刪除 {len(selected)} 首歌曲資料夾嗎？(無法復原)",
-    #         QMessageBox.Yes | QMessageBox.No
-    #     )
-    #     if reply == QMessageBox.No:
-    #         return
-
-    #     deleted_count = 0
-    #     for item in selected:
-    #         folder_name = item.text()
-    #         folder_path = os.path.join(self.songs_path, folder_name)
-    #         if os.path.exists(folder_path):
-    #             shutil.rmtree(folder_path)
-    #             deleted_count += 1
-
-    #     QMessageBox.information(self, "刪除完成", f"已刪除 {deleted_count} 首歌曲。")
-    #     self.load_song_folders()
-    #     self.selected_list.clear()
-    #     self.update_labels()
-
     def compress_selected(self):
         "壓縮待壓縮區的歌曲至輸出目的地資料夾"
         if not (self.songs_path and self.output_path):
@@ -269,32 +195,11 @@ class OsuCompressor(QWidget):
             QMessageBox.warning(self, "錯誤", "右側清單沒有歌曲可壓縮！")
             return
 
+        folder_names = [self.selected_list.item(i).text() for i in range(total)]
         self.setEnabled(False)
         QApplication.setOverrideCursor(Qt.WaitCursor)
-        self.progress_bar.setMaximum(total)
-        self.progress_bar.setValue(0)
 
-        folder_names = [self.selected_list.item(i).text() for i in range(total)]
-
-        def compress_song(folder_name):
-            folder_path = os.path.join(self.songs_path, folder_name)
-            osz_path = os.path.join(self.output_path, folder_name + ".osz")
-            with zipfile.ZipFile(osz_path, "w", zipfile.ZIP_DEFLATED) as zf:
-                for root, _, files in os.walk(folder_path):
-                    for f in files:
-                        abs_path = os.path.join(root, f)
-                        rel_path = os.path.relpath(abs_path, folder_path)
-                        zf.write(abs_path, rel_path)
-            return folder_name
-
-        success = 0
-        max_workers = min(4, total)
-        with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            futures = [executor.submit(compress_song, name) for name in folder_names]
-            for _ in as_completed(futures):
-                success += 1
-                self.progress_bar.setValue(success)
-                QApplication.processEvents()
+        success = compress_songs(folder_names, self.songs_path, self.output_path, self.progress_bar)
 
         self.setEnabled(True)
         QApplication.restoreOverrideCursor()
@@ -313,10 +218,3 @@ class OsuCompressor(QWidget):
 
         self.available_label.setText(f"可壓縮歌曲(共 {total_left} 首，已選 {selected_left} 首)")
         self.selected_label.setText(f"已選取歌曲(共 {total_right} 首，已選 {selected_right} 首)")
-
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = OsuCompressor()
-    window.show()
-    sys.exit(app.exec_())

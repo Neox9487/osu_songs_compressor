@@ -1,4 +1,6 @@
 import shelve
+import os
+from pathlib import Path
 from typing import Literal
 
 CONFIG_MOLDULE = {
@@ -59,7 +61,12 @@ WINDOW_DEFAULT_HEIGHT = CONFIG_MOLDULE["window"]["default_height"]
 DARK_MODE_STYLES = CONFIG_MOLDULE["window"]["styles"]["dark_mode"]
 LIGHT_MODE_STYLES = CONFIG_MOLDULE["window"]["styles"]["light_mode"]
 
-with shelve.open("settings") as db:
+user_data_dir = Path.home() / ".osu_compressor"
+user_data_dir.mkdir(exist_ok=True)
+
+DB_PATH = str(user_data_dir / "settings")
+
+with shelve.open(DB_PATH) as db:
     # dir
     dirs = db.get("dir", {"songs_dir": None, "target_dir": None})
     SONGS_DIR = dirs["songs_dir"]
@@ -74,7 +81,7 @@ def save_setting(setting_type: Literal["dir", "personalization"], key: str, valu
     if key not in CONFIG_MOLDULE["settings"][setting_type]:
         raise ValueError(f"key is not exist in '{setting_type}'!")
     
-    with shelve.open("settings") as db:
+    with shelve.open(DB_PATH) as db:
         current = db.get(setting_type, CONFIG_MOLDULE["settings"][setting_type].copy())
         current[key] = value
         db[setting_type] = current

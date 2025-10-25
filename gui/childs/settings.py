@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QCheckBox, QPushButton, QDialog
 )
 from PyQt5.QtCore import pyqtSignal, Qt
+from configs import DB_PATH
 from configs import save_setting
 
 class SettingsWindow(QDialog):
@@ -19,7 +20,7 @@ class SettingsWindow(QDialog):
         layout = QVBoxLayout()
 
         # 個人化設定
-        with shelve.open("settings") as db:
+        with shelve.open(DB_PATH) as db:
             personalization = db.get("personalization", {"dark_mode": False, "show_mascot": True})
             DARK_MODE = personalization["dark_mode"]
             SHOW_MASCOT = personalization["show_mascot"]

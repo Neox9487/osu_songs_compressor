@@ -1,4 +1,6 @@
 import os
+from typing import Literal
+
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
     QFileDialog, QListWidget, QMessageBox, QLabel, QListWidgetItem, QProgressBar, QApplication
@@ -9,8 +11,15 @@ from PyQt5.QtCore import Qt, QSize
 from actions import compress_songs
 from utils.file import find_background_image
 
-from configs import (APP_NAME, VERSION, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, SONGS_DIR, TARGET_DIR)
+from configs import (
+    APP_NAME, VERSION, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, 
+    SONGS_DIR, TARGET_DIR,
+    DARK_MODE, SHOW_MASCOT,
+    DARK_MODE_STYLES, LIGHT_MODE_STYLES
+)
 from configs import save_setting
+
+from gui.childs import SettingsWindow
 
 class OsuCompressor(QWidget):
     def __init__(self):
@@ -102,7 +111,7 @@ class OsuCompressor(QWidget):
         self.select_btn.clicked.connect(self.select_songs_folder)
         self.output_btn.clicked.connect(self.select_output_folder)
         self.refresh_btn.clicked.connect(self.load_song_folders)
-        self.setting_btn.clicked.connect(self.open_settings_window)
+        self.setting_btn.clicked.connect(self.open_ui_settings_window)
         self.add_btn.clicked.connect(self.add_selected)
         self.remove_btn.clicked.connect(self.remove_selected)
         self.available_list.itemSelectionChanged.connect(self.update_labels)
@@ -113,6 +122,12 @@ class OsuCompressor(QWidget):
         self.default_icon_path = os.path.join(os.path.dirname(__file__), "../assets/osu.png")
 
     def initialize(self):
+        if DARK_MODE:
+            style = DARK_MODE_STYLES
+        else:
+            style = LIGHT_MODE_STYLES
+
+        self.update_windows_style(style, SHOW_MASCOT)
         self.load_song_folders()
         self.update_compress_button_state()
 
@@ -121,6 +136,7 @@ class OsuCompressor(QWidget):
         folder = QFileDialog.getExistingDirectory(self, "選擇 osu! Songs 資料夾")
         if not folder:
             return
+        self.selected_list.clear()
         self.songs_path = folder
         self.path_label.setText(f"已選擇 Songs 資料夾：{folder}")
         self.load_song_folders()
@@ -137,8 +153,77 @@ class OsuCompressor(QWidget):
         self.update_compress_button_state()
         save_setting("dir", "target_dir", folder)
 
-    def open_settings_window(self):
+    def open_ui_settings_window(self):
+        dlg = SettingsWindow()
+        dlg.settings_changed.connect(self.on_ui_settings_changed)
+        dlg.exec_()
+
+
+    def update_windows_style(self, style: dict, show_mascot: bool):
+        "套用 style 到主視窗背景與文字"
+
+        bg = style.get("background", "#FFFFFF")
+        fg = style.get("foreground", "#000000")
+        button_bg = style.get("button_bg", "#F0F0F0")
+        button_fg = style.get("button_fg", "#000000")
+        highlight = style.get("highlight", "#6200EE")
+
+        self.setStyleSheet(f"""
+            QWidget {{
+                background-color: {bg};
+                color: {fg};
+            }}
+            QPushButton {{
+                background-color: {button_bg};
+                color: {button_fg};
+            }}
+            QListWidget::item:selected {{
+                background-color: {highlight};
+            }}
+        """)
+
+        # processor bar
+        p_bg = style.get("progress_bg", "#333333")
+        p_chunk = style.get("progress_chunk", "#6200EE")
+        p_height = style.get("progress_height", 20)
+        p_radius = style.get("progress_radius", 8)
+
+        self.progress_bar.setStyleSheet(f"""
+            QProgressBar {{
+                background-color: {p_bg};
+                border-radius: {p_radius}px;
+                text-align: center;
+                height: {p_height}px;
+            }}
+            QProgressBar::chunk {{
+                background-color: {p_chunk};
+                border-radius: {p_radius}px;
+            }}
+        """)
+
+        # 吉祥物圖片(未完成!)
         pass
+
+    def on_ui_settings_changed(self, settings: dict):
+        """
+        settings: dict
+            {
+                "dark_mode": bool,
+                "show_mascot": bool
+            }
+        """
+        # 選擇樣式
+        if settings.get("dark_mode"):
+            style = DARK_MODE_STYLES
+        else:
+            style = LIGHT_MODE_STYLES
+
+        self.update_windows_style(style, settings.get("show_mascot"))
+
+        # 將設定存起來
+        save_setting("personalization", "dark_mode", settings.get("dark_mode", False))
+        save_setting("personalization", "show_mascot", settings.get("show_mascot", True))
+
 
     def update_compress_button_state(self):
         "更新壓縮按鈕(能不能開壓"

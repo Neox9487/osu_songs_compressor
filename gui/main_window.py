@@ -9,22 +9,34 @@ from PyQt5.QtCore import Qt, QSize
 from actions import compress_songs
 from utils.file import find_background_image
 
+from configs import (APP_NAME, VERSION, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, SONGS_DIR, TARGET_DIR)
+from configs import save_setting
+
 class OsuCompressor(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("osu! 歌曲壓縮器 (.osz)")
-        self.setGeometry(200, 150, 950, 620)
+        self.setWindowTitle(f"{APP_NAME} {VERSION}")
+        self.setGeometry(0, 0, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT)
 
         main_layout = QVBoxLayout()
 
-        # 路徑
-        self.path_label = QLabel("尚未選擇 Songs 資料夾")
-        self.path_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.path_label)
+        # 輸入輸出路徑
+        self.songs_path = SONGS_DIR
+        self.output_path = TARGET_DIR
 
-        self.output_label = QLabel("尚未選擇輸出資料夾")
+        if not TARGET_DIR:
+            self.output_label = QLabel("尚未選擇 Songs 資料夾")
+        else :
+            self.output_label = QLabel(f"已選擇輸出目的地： {TARGET_DIR}")
         self.output_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.output_label)
+
+        if not SONGS_DIR:
+            self.path_label = QLabel("尚未選擇 Songs 資料夾")
+        else :
+            self.path_label = QLabel(f"已選擇 Songs 資料夾： {SONGS_DIR}")
+        self.path_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.path_label)
 
         # 上面的按鈕列
         top_btns = QHBoxLayout()
@@ -90,11 +102,12 @@ class OsuCompressor(QWidget):
         self.available_list.itemSelectionChanged.connect(self.update_labels)
         self.selected_list.itemSelectionChanged.connect(self.update_labels)
 
-        self.songs_path = None
-        self.output_path = None
-
         # OSU 圖片路徑(給沒有 bg 的歌曲用)
         self.default_icon_path = os.path.join(os.path.dirname(__file__), "../assets/osu.png")
+
+    def initialize(self):
+        self.load_song_folders()
+        self.update_compress_button_state()
 
     def select_songs_folder(self):
         "選 Songs 資料夾"
@@ -105,6 +118,7 @@ class OsuCompressor(QWidget):
         self.path_label.setText(f"已選擇 Songs 資料夾：{folder}")
         self.load_song_folders()
         self.update_compress_button_state()
+        save_setting("dir", "songs_dir", folder)
 
     def select_output_folder(self):
         "選壓縮目osz要押去哪"
@@ -114,6 +128,7 @@ class OsuCompressor(QWidget):
         self.output_path = folder
         self.output_label.setText(f"已選擇輸出目的地：{folder}")
         self.update_compress_button_state()
+        save_setting("dir", "target_dir", folder)
 
     def update_compress_button_state(self):
         "更新壓縮按鈕(能不能開壓"

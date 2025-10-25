@@ -1,4 +1,4 @@
-# osu! Song Compressor 使用說明
+# osu! Song Compressor 
 
 ## 1. 選取 Songs 資料夾位置
 通常在你的 osu! 安裝資料夾內。

@@ -43,12 +43,11 @@ class OsuCompressor(QWidget):
         self.select_btn = QPushButton("選擇 Songs 資料夾")
         self.output_btn = QPushButton("選擇輸出目的地")
         self.refresh_btn = QPushButton("重新整理")
-        self.compress_btn = QPushButton("壓縮右側清單至目的地資料夾")
-        self.compress_btn.setEnabled(False)
+        self.setting_btn = QPushButton("設定")
         top_btns.addWidget(self.select_btn)
         top_btns.addWidget(self.output_btn)
         top_btns.addWidget(self.refresh_btn)
-        top_btns.addWidget(self.compress_btn)
+        top_btns.addWidget(self.setting_btn)
         main_layout.addLayout(top_btns)
 
         # 進度條
@@ -56,7 +55,7 @@ class OsuCompressor(QWidget):
         self.progress_bar.setValue(0)
         main_layout.addWidget(self.progress_bar)
 
-        # 下面
+        # 下面 
         lists_layout = QHBoxLayout()
         # 左邊
         left_layout = QVBoxLayout()
@@ -92,15 +91,23 @@ class OsuCompressor(QWidget):
 
         self.setLayout(main_layout)
 
+        # 底部動作
+        button_btns = QHBoxLayout()
+        self.compress_btn = QPushButton("開始壓縮")
+        self.compress_btn.setEnabled(False)
+        button_btns.addWidget(self.compress_btn)
+        main_layout.addLayout(button_btns)
+
         # 綁定事件
         self.select_btn.clicked.connect(self.select_songs_folder)
         self.output_btn.clicked.connect(self.select_output_folder)
         self.refresh_btn.clicked.connect(self.load_song_folders)
+        self.setting_btn.clicked.connect(self.open_settings_window)
         self.add_btn.clicked.connect(self.add_selected)
         self.remove_btn.clicked.connect(self.remove_selected)
-        self.compress_btn.clicked.connect(self.compress_selected)
         self.available_list.itemSelectionChanged.connect(self.update_labels)
         self.selected_list.itemSelectionChanged.connect(self.update_labels)
+        self.compress_btn.clicked.connect(self.compress_selected)
 
         # OSU 圖片路徑(給沒有 bg 的歌曲用)
         self.default_icon_path = os.path.join(os.path.dirname(__file__), "../assets/osu.png")
@@ -129,6 +136,9 @@ class OsuCompressor(QWidget):
         self.output_label.setText(f"已選擇輸出目的地：{folder}")
         self.update_compress_button_state()
         save_setting("dir", "target_dir", folder)
+
+    def open_settings_window(self):
+        pass
 
     def update_compress_button_state(self):
         "更新壓縮按鈕(能不能開壓"

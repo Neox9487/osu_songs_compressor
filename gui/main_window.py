@@ -43,7 +43,7 @@ class OsuCompressor(QWidget):
         self.select_btn = QPushButton("選擇 Songs 資料夾")
         self.output_btn = QPushButton("選擇輸出目的地")
         self.refresh_btn = QPushButton("重新整理")
-        self.setting_btn = QPushButton("設定")
+        self.setting_btn = QPushButton("UI 設定")
         top_btns.addWidget(self.select_btn)
         top_btns.addWidget(self.output_btn)
         top_btns.addWidget(self.refresh_btn)

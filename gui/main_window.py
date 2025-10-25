@@ -33,19 +33,19 @@ class OsuCompressor(QWidget):
         self.songs_path = SONGS_DIR
         self.output_path = TARGET_DIR
 
-        if not TARGET_DIR:
-            self.output_label = QLabel("尚未選擇輸出目的地")
-        else :
-            self.output_label = QLabel(f"已選擇輸出目的地： {TARGET_DIR}")
-        self.output_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.output_label)
-
         if not SONGS_DIR:
             self.path_label = QLabel("尚未選擇 Songs 資料夾")
         else :
             self.path_label = QLabel(f"已選擇 Songs 資料夾： {SONGS_DIR}")
         self.path_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.path_label)
+
+        if not TARGET_DIR:
+            self.output_label = QLabel("尚未選擇輸出目的地")
+        else :
+            self.output_label = QLabel(f"已選擇輸出目的地： {TARGET_DIR}")
+        self.output_label.setAlignment(Qt.AlignCenter)
+        main_layout.addWidget(self.output_label)
 
         # 上面的按鈕列
         top_btns = QHBoxLayout()

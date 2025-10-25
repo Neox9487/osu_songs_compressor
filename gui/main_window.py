@@ -34,7 +34,7 @@ class OsuCompressor(QWidget):
         self.output_path = TARGET_DIR
 
         if not TARGET_DIR:
-            self.output_label = QLabel("尚未選擇 Songs 資料夾")
+            self.output_label = QLabel("尚未選擇輸出目的地")
         else :
             self.output_label = QLabel(f"已選擇輸出目的地： {TARGET_DIR}")
         self.output_label.setAlignment(Qt.AlignCenter)

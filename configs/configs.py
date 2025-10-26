@@ -41,16 +41,6 @@ CONFIG_MOLDULE = {
                 "progress_radius": 8,
             }
         }
-    },
-    "settings": {
-        "dir": {
-            "songs_dir": None,
-            "target_dir": None
-        },
-        "personalization": {
-            "dark_mode": False,
-            "show_mascot": False
-        }
     }
 }
 
@@ -63,25 +53,4 @@ LIGHT_MODE_STYLES = CONFIG_MOLDULE["window"]["styles"]["light_mode"]
 
 user_data_dir = Path.home() / ".osu_compressor"
 user_data_dir.mkdir(exist_ok=True)
-
 DB_PATH = str(user_data_dir / "settings")
-
-with shelve.open(DB_PATH) as db:
-    # dir
-    dirs = db.get("dir", {"songs_dir": None, "target_dir": None})
-    SONGS_DIR = dirs["songs_dir"]
-    TARGET_DIR = dirs["target_dir"]
-
-    # personalization
-    personalization = db.get("personalization", {"dark_mode": False, "show_mascot": True})
-    DARK_MODE = personalization["dark_mode"]
-    SHOW_MASCOT = personalization["show_mascot"]
-
-def save_setting(setting_type: Literal["dir", "personalization"], key: str, value):
-    if key not in CONFIG_MOLDULE["settings"][setting_type]:
-        raise ValueError(f"key is not exist in '{setting_type}'!")
-    
-    with shelve.open(DB_PATH) as db:
-        current = db.get(setting_type, CONFIG_MOLDULE["settings"][setting_type].copy())
-        current[key] = value
-        db[setting_type] = current

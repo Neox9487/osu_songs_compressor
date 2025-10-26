@@ -3,8 +3,7 @@ from PyQt5.QtWidgets import (
     QVBoxLayout, QCheckBox, QPushButton, QDialog
 )
 from PyQt5.QtCore import pyqtSignal, Qt
-from configs import DB_PATH
-from configs import save_setting
+from utils.settings import save_setting, fetch_setting
 
 class SettingsWindow(QDialog):
     settings_changed = pyqtSignal(dict)
@@ -20,17 +19,15 @@ class SettingsWindow(QDialog):
         layout = QVBoxLayout()
 
         # 載入個人化設定
-        with shelve.open(DB_PATH) as db:
-            personalization = db.get("personalization", {"dark_mode": False, "show_mascot": True})
-            DARK_MODE = personalization["dark_mode"]
-            SHOW_MASCOT = personalization["show_mascot"]
+        dark_mode = fetch_setting("personalization", "dark_mode")
+        show_mascot = fetch_setting("personalization", "show_mascot")
 
         # 勾選框
         self.dark_mode_cb = QCheckBox("啟用深色模式")
-        self.dark_mode_cb.setChecked(DARK_MODE)
+        self.dark_mode_cb.setChecked(dark_mode)
 
         self.mascot_cb = QCheckBox("顯示吉祥物")
-        self.mascot_cb.setChecked(SHOW_MASCOT)
+        self.mascot_cb.setChecked(show_mascot)
 
         # 按鈕
         apply_btn = QPushButton("套用")
@@ -41,7 +38,7 @@ class SettingsWindow(QDialog):
         layout.addWidget(apply_btn)
         self.setLayout(layout)
 
-        self.update_window_style(DARK_MODE)
+        self.update_this_window_style(dark_mode)
 
     def apply_changes(self):
         """儲存設定 + 通知主視窗"""
@@ -56,7 +53,7 @@ class SettingsWindow(QDialog):
         self.settings_changed.emit(new_settings)
         self.accept()
 
-        self.update_window_style(self.dark_mode_cb.isChecked())
+        self.update_this_window_style(self.dark_mode_cb.isChecked())
 
-    def update_window_style(self, dark_mode: bool):
+    def update_this_window_style(self, dark_mode: bool):
         pass

@@ -1,5 +1,4 @@
 import os
-from typing import Literal
 
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
@@ -8,16 +7,14 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize
 
-from actions import compress_songs
+from utils.compression import compress_songs
 from utils.file import find_background_image
+from utils.settings import save_setting, fetch_setting
 
 from configs import (
-    APP_NAME, VERSION, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT, 
-    SONGS_DIR, TARGET_DIR,
-    DARK_MODE, SHOW_MASCOT,
+    APP_NAME, VERSION, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT,
     DARK_MODE_STYLES, LIGHT_MODE_STYLES
 )
-from configs import save_setting
 
 from gui.childs import SettingsWindow
 
@@ -30,20 +27,20 @@ class OsuCompressor(QWidget):
         main_layout = QVBoxLayout()
 
         # 輸入輸出路徑
-        self.songs_path = SONGS_DIR
-        self.output_path = TARGET_DIR
+        self.songs_path = fetch_setting("dir", "songs_dir")
+        self.output_path = fetch_setting("dir", "target_dir")
 
-        if not SONGS_DIR:
+        if not self.songs_path:
             self.path_label = QLabel("尚未選擇 Songs 資料夾")
         else :
-            self.path_label = QLabel(f"已選擇 Songs 資料夾： {SONGS_DIR}")
+            self.path_label = QLabel(f"已選擇 Songs 資料夾： {self.songs_path}")
         self.path_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.path_label)
 
-        if not TARGET_DIR:
+        if not self.output_path:
             self.output_label = QLabel("尚未選擇輸出目的地")
         else :
-            self.output_label = QLabel(f"已選擇輸出目的地： {TARGET_DIR}")
+            self.output_label = QLabel(f"已選擇輸出目的地： {self.output_path}")
         self.output_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(self.output_label)
 
@@ -122,24 +119,28 @@ class OsuCompressor(QWidget):
         self.default_icon_path = os.path.join(os.path.dirname(__file__), "../assets/osu.png")
 
     def initialize(self):
-        if DARK_MODE:
+        if fetch_setting("personalization", "dark_mode"):
             style = DARK_MODE_STYLES
         else:
             style = LIGHT_MODE_STYLES
 
-        self.update_windows_style(style, SHOW_MASCOT)
+        self.update_windows_style(style, fetch_setting("personalization", "show_mascot"))
         self.load_song_folders()
         self.update_compress_button_state()
 
     def select_songs_folder(self):
         "選 Songs 資料夾"
+        
         folder = QFileDialog.getExistingDirectory(self, "選擇 osu! Songs 資料夾")
         if not folder:
             return
+        
         self.selected_list.clear()
         self.songs_path = folder
         self.path_label.setText(f"已選擇 Songs 資料夾：{folder}")
+
         self.load_song_folders()
+        
         self.update_compress_button_state()
         save_setting("dir", "songs_dir", folder)
 
@@ -148,6 +149,7 @@ class OsuCompressor(QWidget):
         folder = QFileDialog.getExistingDirectory(self, "選擇檔案輸出目的地")
         if not folder:
             return
+        
         self.output_path = folder
         self.output_label.setText(f"已選擇輸出目的地：{folder}")
         self.update_compress_button_state()
@@ -302,14 +304,13 @@ class OsuCompressor(QWidget):
         folder_names = [self.selected_list.item(i).text() for i in range(total)]
         self.setEnabled(False)
         QApplication.setOverrideCursor(Qt.WaitCursor)
-
+        
         success = compress_songs(folder_names, self.songs_path, self.output_path, self.progress_bar)
 
         self.setEnabled(True)
         QApplication.restoreOverrideCursor()
 
         QMessageBox.information(self, "完成", f"壓縮 {success} 首歌曲至\n{self.output_path}")
-        self.selected_list.clear()
         self.progress_bar.setValue(0)
         self.update_labels()
 

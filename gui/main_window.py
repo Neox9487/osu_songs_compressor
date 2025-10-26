@@ -12,7 +12,7 @@ from utils.file import find_background_image
 from utils.settings import save_setting, fetch_setting
 
 from configs import (
-    APP_NAME, VERSION, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT,
+    APP_NAME, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT,
     DARK_MODE_STYLES, LIGHT_MODE_STYLES
 )
 
@@ -21,7 +21,7 @@ from gui.childs import SettingsWindow
 class OsuCompressor(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(f"{APP_NAME} {VERSION}")
+        self.setWindowTitle(f"{APP_NAME}")
         self.setGeometry(0, 0, WINDOW_DEFAULT_WIDTH, WINDOW_DEFAULT_HEIGHT)
 
         main_layout = QVBoxLayout()
@@ -29,13 +29,6 @@ class OsuCompressor(QWidget):
         # 輸入輸出路徑
         self.songs_path = fetch_setting("dir", "songs_dir")
         self.output_path = fetch_setting("dir", "target_dir")
-
-        if not self.songs_path:
-            self.path_label = QLabel("尚未選擇 Songs 資料夾")
-        else :
-            self.path_label = QLabel(f"已選擇 Songs 資料夾： {self.songs_path}")
-        self.path_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(self.path_label)
 
         if not self.output_path:
             self.output_label = QLabel("尚未選擇輸出目的地")
@@ -137,7 +130,6 @@ class OsuCompressor(QWidget):
         
         self.selected_list.clear()
         self.songs_path = folder
-        self.path_label.setText(f"已選擇 Songs 資料夾：{folder}")
 
         self.load_song_folders()
         
@@ -273,6 +265,7 @@ class OsuCompressor(QWidget):
         self.progress_bar.setValue(0)
 
         if loaded_count == 0:
+            self.songs_path = None
             QMessageBox.warning(self, "提示", "目前資料夾沒有符合 osu! 格式的歌曲資料夾!")
         
     def add_selected(self):

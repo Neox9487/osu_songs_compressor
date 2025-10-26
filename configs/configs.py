@@ -1,7 +1,4 @@
-import shelve
-import os
 from pathlib import Path
-from typing import Literal
 
 CONFIG_MOLDULE = {
     "app_name": "osu! Songs Compressor",
@@ -31,7 +28,7 @@ CONFIG_MOLDULE = {
                 "secondary_text": "#555555",
                 "button_bg": "#F0F0F0",
                 "button_fg": "#000000",
-                "highlight": "#875DA0FF",
+                "highlight": "#62A6BBFF",
                 "border": "#CCCCCC",
                 "tooltip_bg": "#FFFFE0",
                 "tooltip_fg": "#000000",

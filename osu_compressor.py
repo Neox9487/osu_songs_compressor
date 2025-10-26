@@ -6,6 +6,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = OsuCompressor()
     initailize_settings_file()
-    window.initialize()
     window.show()
+    window.initialize()
     sys.exit(app.exec_())

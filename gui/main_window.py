@@ -158,15 +158,30 @@ class OsuCompressor(QWidget):
         dlg.settings_changed.connect(self.on_ui_settings_changed)
         dlg.exec_()
 
+    def on_ui_settings_changed(self, settings: dict):
+        """
+        settings: dict
+            {
+                "dark_mode": bool,
+                "show_mascot": bool
+            }
+        """
+        # 選擇樣式
+        if settings.get("dark_mode"):
+            style = DARK_MODE_STYLES
+        else:
+            style = LIGHT_MODE_STYLES
+
+        self.update_windows_style(style, settings.get("show_mascot"))
 
     def update_windows_style(self, style: dict, show_mascot: bool):
-        "套用 style 到主視窗背景與文字"
+        "套用 style 到主視窗 UI"
 
-        bg = style.get("background", "#FFFFFF")
-        fg = style.get("foreground", "#000000")
-        button_bg = style.get("button_bg", "#F0F0F0")
-        button_fg = style.get("button_fg", "#000000")
-        highlight = style.get("highlight", "#6200EE")
+        bg = style.get("background")
+        fg = style.get("foreground")
+        button_bg = style.get("button_bg")
+        button_fg = style.get("button_fg")
+        highlight = style.get("highlight")
 
         self.setStyleSheet(f"""
             QWidget {{
@@ -183,8 +198,8 @@ class OsuCompressor(QWidget):
         """)
 
         # processor bar
-        p_bg = style.get("progress_bg", "#333333")
-        p_chunk = style.get("progress_chunk", "#6200EE")
+        p_bg = style.get("progress_bg")
+        p_chunk = style.get("progress_chunk")
         p_height = style.get("progress_height", 20)
         p_radius = style.get("progress_radius", 8)
 
@@ -203,27 +218,6 @@ class OsuCompressor(QWidget):
 
         # 吉祥物圖片(未完成!)
         pass
-
-    def on_ui_settings_changed(self, settings: dict):
-        """
-        settings: dict
-            {
-                "dark_mode": bool,
-                "show_mascot": bool
-            }
-        """
-        # 選擇樣式
-        if settings.get("dark_mode"):
-            style = DARK_MODE_STYLES
-        else:
-            style = LIGHT_MODE_STYLES
-
-        self.update_windows_style(style, settings.get("show_mascot"))
-
-        # 將設定存起來
-        save_setting("personalization", "dark_mode", settings.get("dark_mode", False))
-        save_setting("personalization", "show_mascot", settings.get("show_mascot", True))
-
 
     def update_compress_button_state(self):
         "更新壓縮按鈕(能不能開壓"

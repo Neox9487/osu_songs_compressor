@@ -19,7 +19,7 @@ class SettingsWindow(QDialog):
 
         layout = QVBoxLayout()
 
-        # 個人化設定
+        # 載入個人化設定
         with shelve.open(DB_PATH) as db:
             personalization = db.get("personalization", {"dark_mode": False, "show_mascot": True})
             DARK_MODE = personalization["dark_mode"]
@@ -41,6 +41,8 @@ class SettingsWindow(QDialog):
         layout.addWidget(apply_btn)
         self.setLayout(layout)
 
+        self.update_window_style(DARK_MODE)
+
     def apply_changes(self):
         """儲存設定 + 通知主視窗"""
         new_settings = {
@@ -53,3 +55,8 @@ class SettingsWindow(QDialog):
 
         self.settings_changed.emit(new_settings)
         self.accept()
+
+        self.update_window_style(self.dark_mode_cb.isChecked())
+
+    def update_window_style(self, dark_mode: bool):
+        pass

@@ -1,1 +1,1 @@
-from .settings import SettingsWindow
+from .settings_window import SettingsWindow

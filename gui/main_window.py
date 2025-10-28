@@ -7,8 +7,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize
 
-from utils.compression import compress_songs
-from utils.file import find_background_image
+from utils.songs import compress_songs, load_songs
 from utils.settings import save_setting, fetch_setting
 
 from configs import (
@@ -227,37 +226,19 @@ class OsuCompressor(QWidget):
         total = len(folders)
         self.progress_bar.setMaximum(total)
         self.progress_bar.setValue(0)
-    
-        loaded_count = 0
         
         self.setEnabled(False)
         QApplication.setOverrideCursor(Qt.WaitCursor)
 
-        for idx, folder_name in enumerate(folders, 1):
-            folder_path = os.path.join(self.songs_path, folder_name)
-    
-            # 檢查格式
-            has_osu = any(f.lower().endswith('.osu') for f in os.listdir(folder_path))
-            has_music = any(f.lower().endswith(('.mp3', '.ogg', '.wav')) for f in os.listdir(folder_path))
-            if not (has_osu and has_music):
-                self.progress_bar.setValue(idx)
-                QApplication.processEvents()
-                continue
-    
-            # 處裡背景圖示
-            bg = find_background_image(folder_path)
-            pixmap = QPixmap(bg) if bg else QPixmap(self.default_icon_path)
-            pixmap = pixmap.scaled(96, 54, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            icon = QIcon(pixmap)
-    
-            item = QListWidgetItem(icon, folder_name)
-            self.available_list.addItem(item)
-            loaded_count += 1
-    
-            self.progress_bar.setValue(idx)
-            QApplication.processEvents()
-            self.update_labels()
+        loaded_count = load_songs(
+            folders,
+            self.songs_path,
+            self.progress_bar,
+            self.available_list,
+            self.default_icon_path,
+        )
 
+        self.update_labels()
         self.setEnabled(True)
         QApplication.restoreOverrideCursor()
 
@@ -298,7 +279,14 @@ class OsuCompressor(QWidget):
         self.setEnabled(False)
         QApplication.setOverrideCursor(Qt.WaitCursor)
         
-        success = compress_songs(folder_names, self.songs_path, self.output_path, self.progress_bar)
+        try:
+            success = compress_songs(folder_names, self.songs_path, self.output_path, self.progress_bar)
+        except PermissionError:
+            QMessageBox.warning(self, "Permission Denined", "請嘗試其他目標資料夾")
+            self.setEnabled(True)
+            self.progress_bar.setValue(0)
+            QApplication.restoreOverrideCursor()
+            return
 
         self.setEnabled(True)
         QApplication.restoreOverrideCursor()

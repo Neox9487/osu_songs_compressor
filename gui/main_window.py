@@ -2,9 +2,8 @@ import os
 
 from PyQt5.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QPushButton,
-    QFileDialog, QListWidget, QMessageBox, QLabel, QListWidgetItem, QProgressBar, QApplication
+    QFileDialog, QListWidget, QMessageBox, QLabel, QProgressBar, QApplication
 )
-from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtCore import Qt, QSize
 
 from utils.songs import compress_songs, load_songs

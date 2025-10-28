@@ -59,7 +59,7 @@ def load_songs(folders, songs_path, progress_bar: QProgressBar, available_list: 
         bg = find_background_image(folder_path)
         return folder_name, bg
 
-    max_workers = min(8, os.cpu_count() or 4)
+    max_workers = min(4, total)
     results = []
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

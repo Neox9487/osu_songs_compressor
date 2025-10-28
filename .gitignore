@@ -18,7 +18,10 @@ Output/
 # notes
 notes.txt
 
-#settings
+# settings
 settings.bak
 settings.dat
 settings.dir
+
+# test
+test.py

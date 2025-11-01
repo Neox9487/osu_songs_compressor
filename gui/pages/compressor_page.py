@@ -14,6 +14,7 @@ class CompressorPage(QWidget):
         super().__init__()
         self.setup_ui()
 
+    # === ui setup ===
     def setup_ui(self):
         main_layout = QVBoxLayout(self)
         self.setLayout(main_layout)

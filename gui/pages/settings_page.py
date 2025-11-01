@@ -9,6 +9,7 @@ class SettingsPage(QWidget):
         self.main_window = main_window
         self.setup_ui()
 
+    # === ui setup ===
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignTop)

@@ -38,7 +38,7 @@ class OsuCompressor(QWidget):
         self.compressor_btn.clicked.connect(self.select_compressor_page)
         self.settings_btn.clicked.connect(self.select_settings_page)
 
-    # 初始化設定與樣式
+    # === initailze ===
     def initialize(self):
         dark_mode = fetch_setting("personalization", "dark_mode")
         show_mascot = fetch_setting("personalization", "show_mascot")
@@ -46,7 +46,7 @@ class OsuCompressor(QWidget):
         self.update_windows_style(style)
         self.compressor_page.initialize()
 
-    # select page
+    # === select page ===
     def select_compressor_page(self):
         self.pages.setCurrentWidget(self.compressor_page)
 

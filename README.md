@@ -1,5 +1,7 @@
 # osu! Song Compressor 
 <img width="938" height="614" alt="Screenshot 2025-11-01 093401" src="https://github.com/user-attachments/assets/4f869108-686b-4d96-81a0-5bc116119e0c" />
+# 下載鏈結 (v0.0.2)
+https://github.com/Neox9487/osu_songs_compressor/releases/tag/v0.0.2
 
 ## 1. 選取 Songs 資料夾位置
 通常在你的 osu! 遊戲資料夾內。

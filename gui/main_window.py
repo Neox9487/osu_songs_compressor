@@ -68,13 +68,14 @@ class OsuCompressor(QWidget):
                 color: {fg};
                 font-size: 12px;
                 font-weight: bold; 
+                margin: {4}px;
             }}
             QPushButton {{
                 background-color: {button_bg};
                 color: {button_fg};
                 font-size: 12px;
                 border-radius: {8}px;     
-                padding: {4}px {6}px;         
+                padding: {4}px {6}px;    
                 font-weight: bold;        
             }}
             QListWidget::item:selected {{

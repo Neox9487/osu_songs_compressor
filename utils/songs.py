@@ -59,7 +59,7 @@ def load_songs(folders, songs_path, progress_bar: QProgressBar, available_list: 
         bg = find_background_image(folder_path)
         return folder_name, bg
 
-    max_workers = min(4, total)
+    max_workers = max(1, min(4, total))
     results = []
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
@@ -102,7 +102,7 @@ def compress_songs(folder_names, songs_path, output_path, progress_bar: QProgres
         return folder_name
 
     success = 0
-    max_workers = min(4, total)
+    max_workers = max(1, min(4, total))
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         futures = [executor.submit(compress_song, name) for name in folder_names]
         for _ in as_completed(futures):

@@ -19,8 +19,11 @@ CONFIG_MOLDULE = {
                 "tooltip_fg": "#FFFFFF",
                 "progress_bg": "#333333",
                 "progress_chunk": "#BB86FC",
-                "progress_height": 20,
-                "progress_radius": 8,
+                "scroller_bg": "#2C2C2C",
+                "scroller_bg": "#2C2C2C",
+                "scroller_handle": "#555555",
+                "scroller_handle_hover": "#777777",
+                "scroller_handle_pressed": "#999999"
             },
             "light_mode": {
                 "background": "#FFFFFF",
@@ -34,8 +37,10 @@ CONFIG_MOLDULE = {
                 "tooltip_fg": "#000000",
                 "progress_bg": "#EEEEEE",
                 "progress_chunk": "#B9D5FF",
-                "progress_height": 20,
-                "progress_radius": 8,
+                "scroller_bg": "#F0F0F0",
+                "scroller_handle": "#CCCCCC",
+                "scroller_handle_hover": "#AAAAAA",
+                "scroller_handle_pressed": "#888888"
             }
         }
     }

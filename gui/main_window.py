@@ -68,7 +68,7 @@ class OsuCompressor(QWidget):
                 color: {fg};
                 font-size: 12px;
                 font-weight: bold; 
-                margin: {4}px;
+                margin: {3}px;
             }}
             QPushButton {{
                 background-color: {button_bg};

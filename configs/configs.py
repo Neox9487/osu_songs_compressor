@@ -2,7 +2,7 @@ from pathlib import Path
 
 CONFIG_MOLDULE = {
     "app_name": "osu! Songs Compressor",
-    "version": "v1.0.2",
+    "version": "v0.0.2",
     "window": {
         "default_width": 950,
         "default_height": 620,
